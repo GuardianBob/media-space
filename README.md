@@ -1,71 +1,109 @@
-# Media Manager
+# Media Space
 
-A local web app for your media: sync from Jellyfin, discover titles on TMDB, scan external
-drives, bulk-update from CSV, and jump straight to any file in your file manager.
+**Transform your raw media collections into a professional-grade, searchable digital library.**
 
-Reference for the Jellyfin connection, discovery flow and browser layout:
-[seerr-team/seerr](https://github.com/seerr-team/seerr) (no code copied).
+Media Space is an intelligent personal media asset management system designed to bridge the gap between chaotic file directories and a polished viewing experience. Whether you are managing a massive NAS of movies and TV shows or a curated collection on external drives, Media Space provides the visibility, metadata, and discovery tools needed to master your library.
 
-## Setup
+---
 
-Needs Python 3.11+, and Node 20+ to build the frontend. `ffprobe` (part of FFmpeg) is optional, for measuring scanned files. Works on Linux, Windows and macOS.
+## 🚀 The Value Proposition
 
+Managing large media collections often leads to "choice paralysis" or the frustration of not knowing exactly what you have. **Media Space solves this by providing:**
+
+*   **Elimination of Decision Fatigue:** Stop scrolling through folders. Use our smart discovery engine to find exactly what fits your current mood, time constraints, and quality preferences.
+*   **High-Fidelity Asset Visibility:** Go beyond filenames. Know the exact resolution, location, and metadata for every file in your collection without opening a single player.
+*   **Seamless Ecosystem Integration:** Sync effortlessly with Jellyfin and enrich your local data using global industry standards like The Movie Database (TMDB).
+*   **Professional-Grade Cataloging:** Turn messy, inconsistently named files into an organized database of rich, searchable information.
+
+---
+
+## ✨ Core Features
+
+### 🔍 Intelligent Cataloging & Enrichment
+*   **Automated Scanning:** Scan local drives and volumes to build your library. New files are placed in a review queue for safe integration.
+*   **TMDB Integration:** Automatically pull titles, posters, genres, and ratings from The Movie Database to ensure your metadata is always world-class.
+*   **Jellyfin Synchronization:** One-way sync with Jellyfin to keep your local catalog and streaming server perfectly aligned.
+
+### 📊 Advanced Metadata & Quality Tracking
+*   **Precision Resolution Detection:** Using `ffprobe` (optional), Media Space detects exact resolutions and handles widescreen/cropped aspect ratios intelligently (e.g., recognizing a 1920×800 file as high-quality 1080p).
+*   **Deep Filtering:** Sort and filter your collection by resolution, release year, genre, rating, runtime, or availability.
+
+### 🎲 Smart Discovery: "What to Watch?"
+Stop wondering what to watch. Set your parameters—genre, minimum rating, maximum runtime, or specific resolutions—and let Media Space suggest the perfect titles from your existing library.
+
+### 🛠️ Robust Management Tools
+*   **Smart CSV Imports:** Bulk-update or add records via CSV with real-time previews and intelligent matching (Title + Year).
+*   **Volume Tracking:** Drives are tracked by unique volume IDs, ensuring paths remain valid even if mount points shift.
+*   **Safe Data Operations:** Deletions only affect database records—never your actual media files. Includes an "Excluded" safety net to restore accidentally removed titles.
+*   **Direct Access:** If running on your local machine, instantly open any file in your native OS file manager (Dolphin, Nautilus, Explorer, Finder).
+
+---
+
+## 🛠️ Technical Stack
+
+Media Space is built with a modern, decoupled architecture:
+*   **Backend:** Python-powered API managing metadata, scanning jobs, and database operations.
+*   **Frontend:** A high-performance, responsive UI built with **React**, **TypeScript**, and **Tailwind CSS**.
+*   **Database:** Lightweight and reliable **SQLite** for local data persistence.
+*   **Containerization:** Fully Docker-ready for easy deployment.
+
+---
+
+## ⚙️ Installation & Setup
+
+### Prerequisites
+*   **Python 3.11+**
+*   **Node.js 20+** (for frontend builds)
+*   `ffprobe` (part of FFmpeg, optional but recommended for resolution detection)
+
+### Quick Start (Development Mode)
+
+1. **Clone the repository and set up the backend:**
+   ```sh
+   python3 -m venv .venv
+   source .venv/bin/activate  # Windows: .venv\Scripts\activate
+   pip install -e '.[dev]'
+   ```
+
+2. **Build the frontend:**
+   ```sh
+   cd frontend
+   npm install
+   npm run build
+   cd ..
+   ```
+
+3. **Configure Environment Variables:**
+   Create a `.env` file in the root directory:
+   ```env
+   JELLYFIN_SERVER=http://your-server:8096
+   JELLYFIN_API=your-jellyfin-api-key
+   TMDB_API=your-tmdb-key
+   ```
+   **NOTE:**
+   - These can also be added in the settings of the application itself
+
+4. **Launch the application:**
+   ```sh
+   python3 -m mediamanager
+   ```
+   Open [http://127.0.0.1:8787](http://127.0.0.1:8787) in your browser.
+
+---
+
+## 🐳 Docker Deployment
+
+For a production-ready setup, use the included `docker-compose.yml`:
 ```sh
-python3 -m venv .venv
-.venv/bin/pip install -e '.[dev]'     # Windows: .venv\Scripts\pip
-cd frontend && npm install && npm run build && cd ..
+docker-compose up -d
 ```
 
-Create `.env` in the project folder (git-ignored), or enter the same values in Settings:
+---
 
-```sh
-JELLYFIN_SERVER=http://your-server:8096
-JELLYFIN_API=your-jellyfin-api-key
-TMDB_API=your-tmdb-key
-```
+## 📂 Data Management
 
-## Run
+All persistent data is stored in the `data/` directory:
+*   `data/media.db`: The SQLite database containing your library metadata.
+*   `data/config.json`: Your application and path mapping configurations.
 
-```sh
-.venv/bin/python -m mediamanager      # Windows: .venv\Scripts\python
-```
-
-Open <http://127.0.0.1:8787>. Use `--port` to change the port. The app only listens on this
-computer, because Open folder acts on the machine running the backend.
-
-## Connecting Jellyfin's files
-
-Jellyfin reports paths as its server sees them, such as `/media/Movies/x.mkv`. To open those
-files from here:
-
-1. Mount the share on this computer.
-2. In **Settings → Path mappings**, add `/media` → the mount point, e.g. `/mnt/nas/media` or `Z:\`.
-
-## How it behaves
-
-| Area | Behaviour |
-| --- | --- |
-| **Jellyfin sync** | One-way and started by you; nothing is written to Jellyfin. A failed sync changes nothing. Titles gone from Jellyfin are flagged, not removed. |
-| **Media browser** | Sort by title, release date, date added, rating or runtime, in either direction. Sort or filter by resolution too. Filter by first letter, type, availability, genre and year. As in Jellyfin, leading articles are ignored ("The Matrix" is under M) and numbers sort numerically. |
-| **Resolution** | Shown on cards, title pages and each file, e.g. `1080p · 1920×800`. Cropped widescreen counts by width, so 1920×800 is 1080p. A movie shows its best version; a series shows its most common quality and the full mix. Scanned files are measured with `ffprobe` if installed, otherwise labelled from the filename. |
-| **Missing data** | Each sync fills blank fields on new titles from TMDB, and Settings can recheck everything. Only blanks are written. A title with no TMDB ID is linked only on an exact, unique title and year match. |
-| **What to Watch** | Set any of type, availability, year range, genres, resolutions, minimum rating and maximum runtime, then get a random 10, 25 or 50 titles. Several genres or resolutions mean "any of these". A title with no value for a range or minimum, such as no rating, is left out. |
-| **Your edits** | Fields changed by hand or by CSV are kept through syncs. The title page has a button to return a field to Jellyfin's value. |
-| **Discovery** | Saving a TMDB title stores its metadata, marked **Not on Jellyfin**. If it later appears on Jellyfin, the records merge. Nothing is downloaded. |
-| **Drive scan** | Read-only, started by you. New files wait in a review queue. Drives are tracked by volume ID, so a new mount point or drive letter doesn't break their paths. |
-| **CSV import** | Matches on Title + Year and previews every change. You choose whether unmatched rows become new records. Blank cells never erase a value. |
-| **Open folder** | Reveals the file in Dolphin, Nautilus and others (D-Bus, then `xdg-open` on the parent folder), Explorer or Finder. It never plays the file. |
-| **Delete** | Removes only the database record, **never a media file**. You review what goes and type the title to confirm. Deleted Jellyfin titles go to **Excluded**, where they can be restored. Deletes apply to whole titles, not single episodes. |
-
-## Data
-
-`data/media.db` (SQLite) and `data/config.json` hold everything and are git-ignored. Set
-`MEDIA_MANAGER_DATA` to keep them elsewhere.
-
-## Development
-
-```sh
-.venv/bin/python -m pytest               # backend tests
-.venv/bin/python -m mediamanager         # backend, then in another terminal:
-cd frontend && npm run dev               # frontend with hot reload
-```
+*Note: These files are git-ignored by default. You can specify a custom data location using the `MEDIA_MANAGER_DATA` environment variable.*
