@@ -315,3 +315,30 @@ def test_old_database_is_upgraded_in_place(tmp_path, monkeypatch):
     conn = db.connect()
     assert items.list_items(conn, letter="M")["total"] == 1
     conn.close()
+
+
+# ---- Maintenance: duplicates
+
+def test_duplicates_group_by_mode_and_filters(client, conn):
+    a = add_movie(conn, "Heat", 1995, jellyfin_id="jf1")
+    b = add_movie(conn, "Heat", 1995)
+    c = add_movie(conn, "The Heat", 2013)   # different title
+    d = add_movie(conn, "heat", 1996)       # same title, other year
+    add_movie(conn, "Alien", 1979)          # unique
+    conn.execute("UPDATE media_item SET tmdb_id = 949 WHERE id IN (?, ?)", (a, d))
+    conn.commit()
+
+    strict = client.get("/api/maintenance/duplicates").json()
+    assert strict["total_groups"] == 1
+    assert sorted(i["id"] for i in strict["groups"][0]["items"]) == sorted([a, b])
+
+    loose = client.get("/api/maintenance/duplicates?mode=title").json()
+    assert sorted(i["id"] for i in loose["groups"][0]["items"]) == sorted([a, b, d])
+
+    tmdb = client.get("/api/maintenance/duplicates?mode=tmdb").json()
+    assert sorted(i["id"] for i in tmdb["groups"][0]["items"]) == sorted([a, d])
+
+    assert client.get("/api/maintenance/duplicates?kind=series").json()["total_groups"] == 0
+    assert client.get("/api/maintenance/duplicates?source=jellyfin").json()["total_groups"] == 1
+    assert client.get("/api/maintenance/duplicates?mode=bogus").status_code == 409
+    assert c  # not grouped with the others

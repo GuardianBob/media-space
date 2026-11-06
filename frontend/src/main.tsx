@@ -1,4 +1,4 @@
-import { Ban, Compass, Dices, FileSpreadsheet, HardDrive, Library, Loader2, Search, Settings as Cog } from "lucide-react";
+import { Ban, Compass, Dices, FileSpreadsheet, HardDrive, Library, Loader2, Search, Settings as Cog, Wrench } from "lucide-react";
 import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, NavLink, Route, Routes, useNavigate, useSearchParams } from "react-router-dom";
@@ -9,6 +9,7 @@ import { DiscoverList, DiscoverPage, SearchPage } from "./pages/DiscoverPages";
 import { ExcludedPage } from "./pages/ExcludedPage";
 import { ItemPage, TmdbPage } from "./pages/DetailPages";
 import { LibraryPage } from "./pages/LibraryPage";
+import { MaintenancePage } from "./pages/MaintenancePage";
 import { ScanPage } from "./pages/ScanPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { WatchPage } from "./pages/WatchPage";
@@ -19,6 +20,7 @@ const NAV = [
   { to: "/discover", label: "Discover", icon: Compass },
   { to: "/scan", label: "Drive Scan", icon: HardDrive },
   { to: "/csv", label: "CSV Import", icon: FileSpreadsheet },
+  { to: "/maintenance", label: "Maintenance", icon: Wrench },
   { to: "/excluded", label: "Excluded", icon: Ban },
   { to: "/settings", label: "Settings", icon: Cog },
 ];
@@ -106,6 +108,7 @@ function Shell() {
             <Route path="/tmdb/:kind/:id" element={<TmdbPage />} />
             <Route path="/scan" element={<ScanPage />} />
             <Route path="/csv" element={<CsvPage />} />
+            <Route path="/maintenance" element={<MaintenancePage />} />
             <Route path="/excluded" element={<ExcludedPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Routes>

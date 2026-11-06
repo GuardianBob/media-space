@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import csv_import, db, fill, hotlink, items, scanner, volumes
+from . import csv_import, db, fill, hotlink, items, maintenance, scanner, volumes
 from .config import EXTRA_ALLOWED_HOSTS, HOST, PROJECT_ROOT, load_settings, save_settings
 from .jellyfin import JellyfinClient, JellyfinError
 from .jobs import JobRunner
@@ -168,6 +168,10 @@ def create_app(port: int = 8787) -> FastAPI:
         return items.list_items(
             conn, q, kind, library, sort, page, size, order, letter, genre, year, resolution, language
         )
+
+    @app.get("/api/maintenance/duplicates")
+    def duplicates(conn: Conn, mode: str = "title_year", kind: str = "", source: str = ""):
+        return maintenance.find_duplicates(conn, mode, kind, source)
 
     # Declared before /api/items/{item_id}, which would otherwise capture this path.
     @app.get("/api/items/filter-options")
