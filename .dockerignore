@@ -1,0 +1,13 @@
+.venv
+.venv2
+.git
+**/__pycache__
+*.egg-info
+.pytest_cache
+node_modules
+frontend/dist
+data
+.env
+tests
+*.txt
+build-prompt.md

@@ -1,0 +1,23 @@
+services:
+  media-space:
+    build: .
+    container_name: media-space
+    restart: unless-stopped
+    ports:
+      # The app has no login. Bind to a LAN address or put it behind a reverse proxy
+      # with auth rather than exposing it to the internet.
+      - "${MEDIA_MANAGER_BIND:-127.0.0.1}:${MEDIA_MANAGER_PORT:-8787}:8787"
+    environment:
+      JELLYFIN_SERVER: ${JELLYFIN_SERVER:-}
+      JELLYFIN_API: ${JELLYFIN_API:-}
+      TMDB_API: ${TMDB_API:-}
+      # Hostname(s) you type in the browser, with port. Requests with other Host headers are rejected.
+      MEDIA_MANAGER_ALLOWED_HOSTS: ${MEDIA_MANAGER_ALLOWED_HOSTS:-localhost:8787}
+    volumes:
+      - media-space-data:/data
+      # Mount media drives read-only so the scanner can see them, e.g.:
+      # - /mnt/nas/media:/media:ro
+      # Then add a path mapping in Settings: /media -> /media
+
+volumes:
+  media-space-data:
