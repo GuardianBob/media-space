@@ -7,3 +7,4 @@ frontend/dist/
 # API keys, database and config.json
 .env
 data/
+build-prompt.md
