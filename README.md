@@ -39,6 +39,11 @@ Stop wondering what to watch. Set your parameters—genre, minimum rating, maxim
 
 ---
 
+Reference for the Jellyfin connection, discovery flow and browser layout:
+   [seerr-team/seerr](https://github.com/seerr-team/seerr).
+
+---
+
 ## 🛠️ Technical Stack
 
 Media Space is built with a modern, decoupled architecture:
