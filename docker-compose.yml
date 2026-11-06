@@ -3,6 +3,7 @@ services:
     build: .
     container_name: media-space
     restart: unless-stopped
+    network_mode: bridge
     # Must be able to write to the /data mount. Unraid owns appdata folders as nobody:users,
     # so set PUID=99 and PGID=100 in .env there.
     user: "${PUID:-1000}:${PGID:-1000}"
