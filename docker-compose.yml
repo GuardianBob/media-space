@@ -3,6 +3,7 @@ services:
     build: .
     container_name: media-space
     restart: unless-stopped
+    network_mode: bridge
     ports:
       # The app has no login. Bind to a LAN address or put it behind a reverse proxy
       # with auth rather than exposing it to the internet.
